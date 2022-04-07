@@ -21,9 +21,17 @@
 #include <string>
 #include <cmath>
 
+#include "median_filter.hpp"
+
 
 int main()
 {
+	MedianFilter<int> filter_i(11);
+	int i1[11] = {2048, 2051, 2045, 2067, 2091, 2030, 2020, 2010, 2001, 2022, 2211};
+	int out {};
+	for(int i:i1)
+		out = filter_i.calculation(i);
+	std::cout << out << std::endl;
 	return 0;
 }
 

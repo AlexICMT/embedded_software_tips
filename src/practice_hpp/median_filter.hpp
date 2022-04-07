@@ -20,6 +20,7 @@
 #define USER_NULL 0
 #define STOPPER 0
 #define MEDIAN_FILTER_SIZE 11
+#define WINDOW_SIZE 31
 
 template <typename T>
 class MedianFilter
@@ -29,6 +30,7 @@ public:
 	  MedianFilter(int s);
 	  //~MedianFilter();
 	  T calculation(T);
+	  T getBiggest() const {return big.point->value;}
 
 private:
 	struct pair{
@@ -180,6 +182,69 @@ T MedianFilter<T>::calculation(T datum)
 	}
 
 	return median->value;
+}
+
+template <typename T>
+class PeakDetector
+{
+public:
+	PeakDetector(uint32_t s);
+	T calculation(T);
+private:
+	T* wbuffer;
+	uint32_t wr_idx;
+	T peak_value;
+	uint32_t peak_value_idx;
+	uint32_t size;
+
+};
+
+template<typename T>
+PeakDetector<T>::PeakDetector(uint32_t s)
+{
+	size = s;
+	if((size%2) != 0)
+		size = size - 1;
+	wbuffer = new T[size];
+	wr_idx = 0;
+	peak_value = 0;
+	peak_value_idx = 0;
+}
+
+template<typename T>
+T PeakDetector<T>::calculation(T value)
+{
+	if(value >= peak_value)
+	{
+		peak_value = value;				/* New peak value, so record it */
+		peak_value_idx = wr_idx;
+		wbuffer[wr_idx] = value;
+	} else
+	{
+		wbuffer[wr_idx] = value;	 	/* Not a new peak value, so just store it */
+		if (wr_idx == peak_value_idx)	/* Have we over written the peak value ? */
+		{
+            /*  Yes, so we need to do a brute force search to find the new
+                maximum. Note that for efficiency reasons, if there are multiple
+                values of the new peak value, then we want to chose the one
+                whose index value is as far away as possible from the current index */
+			uint32_t idx, cnt;
+			for(cnt = 0, idx = wr_idx, peak_value = 0; cnt < size; ++cnt)
+			{
+				if(wbuffer[idx] >= peak_value)
+				{
+					peak_value = wbuffer[idx];
+					peak_value_idx = idx;
+				}
+				if(++idx >= size)
+					idx = 0;
+			}
+
+		}
+	}
+	if (++wr_idx >= size)
+		wr_idx = 0;
+	return peak_value;
 }
 
 #endif /* PRACTICE_HPP_MEDIAN_FILTER_HPP_ */

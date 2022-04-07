@@ -27,11 +27,16 @@
 int main()
 {
 	MedianFilter<int> filter_i(11);
+	PeakDetector<int> detector(11);
 	int i1[11] = {2048, 2051, 2045, 2067, 2091, 2030, 2020, 2010, 2001, 2022, 2211};
-	int out {};
+	int out {}, max {};
 	for(int i:i1)
+	{
 		out = filter_i.calculation(i);
+		max = detector.calculation(i);
+	}
 	std::cout << out << std::endl;
+	std::cout << max << std::endl;
 	return 0;
 }
 
